@@ -48,7 +48,7 @@ pip install -r requirements.txt
 ## Usage
 
 1. Launch the application.
-2. Drag and drop an attendance CSV file or browse manually.
+2. Drag and drop an Zoom participants report CSV file or browse manually.
 3. Select the desired report options.
 4. Configure attendance and late thresholds if required.
 5. Choose an output location.

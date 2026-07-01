@@ -1,6 +1,6 @@
 # Online Meeting (ZOOM) Attendance Report Maker
 
-A Python-based utility for automating the processing of online meeting attendance exports into structured Excel reports. The application is designed to simplify attendance analysis by generating attendance, late, absent, and filtered participant reports from CSV exports.
+A Python-based utility for automating the processing of online meeting attendance exports into structured Excel reports. The application is designed to simplify attendance analysis by generating attendance, late, absent, and filtered participant reports from Zoom CSV exports.
 
 > **Version:** v0.1.0
 

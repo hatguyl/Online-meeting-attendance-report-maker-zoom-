@@ -27,8 +27,8 @@ NON_WORD_RE = re.compile(r"[^\w\s]", re.UNICODE)
 APOSTROPHE_RE = re.compile(r"[’‘`]")
 PAREN_RE = re.compile(r"\(.*?\)")
 
-BLACKLIST_WORDS = {"mentorbee","mentor", "classroom", "dont", "don't"}
-TITLE_WORDS = {"miss", "sir"}
+BLACKLIST_WORDS = {"Zoom User"}
+TITLE_WORDS = {"Host"}
 
 
 # +----------------+

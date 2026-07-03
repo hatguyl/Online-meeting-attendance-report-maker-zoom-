@@ -37,13 +37,6 @@ The application generates an Excel workbook containing:
 - tkinterdnd2
 - pandas
 - openpyxl
-- Pillow
-
-Install dependencies:
-
-```bash
-pip install -r requirements.txt
-```
 
 ## Usage
 
@@ -58,8 +51,8 @@ pip install -r requirements.txt
 
 ```
 .
-├── tool.py        # Application run point
-├── ui.py          # User interface
+├── tool.py        # App run point
+├── ui.py          # UI
 ├── core.py        # Attendance processing unit
 ├── logo.png
 └── README.md

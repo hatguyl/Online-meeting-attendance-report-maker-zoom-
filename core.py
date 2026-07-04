@@ -22,7 +22,6 @@ def extract_roll_name(text):
 
     return "", cleaned.strip()
 
-
 def is_red_or_yellow(cell):
     fill = cell.fill
     if not fill or not fill.start_color:

@@ -86,7 +86,7 @@ The application creates a single Excel workbook containing:
 .
 ├── tool.py        # App entry point
 ├── ui.py          # UI
-├── core.py        # Attendance processor
+├── core.py        # Attendance pocessing unit
 ├── logo.png
 ├── LICENSE
 └── README.md

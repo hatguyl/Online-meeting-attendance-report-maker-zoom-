@@ -1,117 +1,150 @@
 # Online Meeting (ZOOM) Attendance Report Maker
 
-Desktop application for automating the processing of Zoom meeting attendance exports into structured Excel reports. Designed as an internal productivity tool, it streamlines attendance analysis by generating organized reports with intelligent participant matching, duplicate resolution, and customizable attendance rules.
+Desktop application for automating the processing of Zoom meeting attendance exports into structured Excel reports. Designed as an internal productivity tool, streamlines attendance analysis by generating organized reports with intelligent participant matching, duplicate resolution, automatic report configuration, and customizable attendance rules.
 
-> **Version:** **v1.0.0**
+> **Version:** **v2.1.0**
 
 ---
 
-## ✨ Features
+# ✨ Features
 
-### Attendance Processing
-- Generate Attendance, Late, Absent, and Filtered participant reports
-- Automatic participant duplicate detection and merging
-- Intelligent participant grouping using roll numbers and aliases
+## Attendance Processing
+
+- Generate Attendance, Late, Absent, Filtered, and Unknown participant reports
+- Intelligent duplicate participant detection and merging
+- Automatic participant grouping using roll numbers 
+- Advanced roll number recognition supporting multiple formats
 - Automatic participant name normalization
-- Advanced roll number extraction supporting multiple formats
 - Attendance and absent threshold customization
-- Configurable late cutoff time
-- Batch presets for different meeting schedules
+- Automatic attendance and late cutoff detection
+- Multiple meeting batch presets
+- Support for processing multiple Zoom CSV files
 
-### Report Generation
-- Professionally formatted Excel reports
+## CSV Export
+
+- Automatic CSV issue report generation
+- Combined attendance and late issue report
+- Generates:
+  - `LESS_TIME`
+  - `LATE_ARRIVAL`
+- CSV format ready for downstream processing
+
+## Report Generation
+
+- Formatted Excel reports
 - Automatic worksheet formatting
 - Color-coded attendance status
 - Alphabetically sorted reports
-- RAW report sorted by participant name and join time
+- Automatic worksheet filters
 - Automatic column sizing
-- Excel filters enabled on all worksheets
+- Automatic report naming using meeting metadata
+
+## User Interface
+
+- Modern CustomTkinter interface
+- Drag-and-drop CSV support
+- Multi-file confirmation window
+- Automatic meeting date detection
+- Automatic AM/PM detection
+- Automatic report validation
+- Success, warning, and error notifications
+- Compact and responsive UI
 
 ---
 
-## 📊 Generated Reports
-
-The application creates a single Excel workbook containing:
+# 📊 Generated Reports
 
 | Sheet | Description |
 |-------|-------------|
-| **RAW** | Original participant data sorted by name and join time |
-| **ATT** | Attendance summary with merged duplicate participants |
-| **ABSENT** | Participants below the configured attendance threshold |
+| **RAW** | Original participant attendance data |
+| **ATT** | Attendance summary |
+| **ABSENT** | Participants below the attendance threshold |
 | **LATE** | Participants joining after the configured cutoff time |
-| **CF** | Filtered participants matching blacklist rules |
+| **CF** | Filtered participants |
+| **UNKNOWN** | Device or unidentified participant names |
+| **CSV Issue Report** | Combined attendance and late issues for external systems |
 
 ---
 
-## 🚀 Improvements
+# 🚀 What's New in v2.1.0
 
-- Completely redesigned participant sorting
-- More accurate duplicate detection
-- Improved roll number pattern recognition
-- Better participant grouping logic
-- Improved report sorting and formatting
-- Enhanced Excel highlighting
-- Improved drag-and-drop support
-- Improved error handling
-- Faster, reliable report generation
+- Added multi-file Zoom report support
+- Added automatic CSV issue report generation
+- Added automatic attendance configuration
+- Added automatic late cutoff detection
+- Added automatic meeting metadata detection
+- Added multi-report confirmation window
+- Added Unknown participant detection
+- Improved duplicate participant matching
+- Improved report accuracy
+- Improved UI and workflow
+- Faster generation
+- Better validation and error handling
 
 ---
 
-## 🖥 Requirements
+# 🖥 Requirements
 
 - Windows
 - Python **3.10+**
 
-### Python Packages
+## Python Packages
 
 - customtkinter
 - tkinterdnd2
 - pandas
 - openpyxl
+- rapidfuzz
 
-## 📦 Usage
+# 📦 Usage
 
 1. Launch the application.
-2. Drag and drop a Zoom participant report CSV file or browse manually.
-3. Configure attendance, absent, and late settings if required.
-4. Select the desired report options.
+2. Drag and drop one or more Zoom participant CSV files.
+3. Review or adjust the automatically detected settings.
+4. Select the required report options.
 5. Choose an output location.
-6. Click **Generate Report**.
+6. Generate the report.
 
 ---
 
-## 📁 Project Structure
+# 📁 Project Structure
 
-```
+```text
 .
-├── tool.py        # App entry point
-├── ui.py          # UI
-├── core.py        # Attendance pocessing unit
+├── tool.py              # App entry point
+├── ui.py                # Main UI 
+├── ui2.py               # Multi-report confirmation window
+├── core.py              # Attendance processing unit
 ├── logo.png
+├── requirements.txt
 ├── LICENSE
 └── README.md
 ```
 
 ---
 
-## 📝 Changelog
+# 📝 Changelog
 
-### v1.0.0
-- Major rewrite of the attendance processing engine
-- Improved duplicate participant detection
-- Better sorting
-- Improved UI 
-- Enhanced validation and error handling
+## v2.1.0
+
+- Added multi-file report generation
+- Added automatic report configuration
+- Added CSV issue report export
+- Added Unknown participant detection
+- Improved duplicate detection
+- Improved participant grouping
+- Improved report validation
+- Improved UI and workflow
 - Performance and reliability improvements
 
 ---
 
-## ⚠ Disclaimer
+# ⚠ Disclaimer
 
-This application was developed as an internal productivity tool for processing Zoom meeting attendance reports. While it works with standard Zoom participant exports, additional customization may be required for other meeting platforms or customized report formats.
+This application was developed as an internal productivity tool for processing Zoom meeting attendance reports. While it works with standard Zoom participant exports, additional customization may be required for reports generated by other meeting platforms or modified export formats.
 
 ---
 
-## 📄 License
+# 📄 License
 
 This project is licensed under the **MIT License**. See the [LICENSE](LICENSE) file for details.

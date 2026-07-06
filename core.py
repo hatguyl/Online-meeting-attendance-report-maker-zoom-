@@ -21,6 +21,7 @@ GREEN = PatternFill("solid", fgColor="90EE90")
 RED = PatternFill("solid", fgColor="FF7F7F")
 YELLOW = PatternFill("solid", fgColor="FFD966")
 
+
 # +----------------+
 # | REGEX / CONST  |
 # +----------------+

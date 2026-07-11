@@ -1,8 +1,8 @@
 # Online Meeting (ZOOM) Attendance Report Maker
 
-Desktop application for automating the processing of Zoom meeting attendance exports into structured Excel reports. Designed as an internal productivity tool, it streamlines attendance analysis by generating organized reports with intelligent participant matching, duplicate resolution, and customizable attendance rules.
+Desktop application for automating the processing of Zoom meeting attendance exports into structured Excel reports. Designed as an internal productivity tool, streamlines attendance analysis by generating organized reports with intelligent participant matching, duplicate resolution, automatic report configuration, and customizable attendance rules.
 
-> **Version:** **v2.0.0**
+> **Version:** **v2.1.0**
 
 ---
 
@@ -10,93 +10,76 @@ Desktop application for automating the processing of Zoom meeting attendance exp
 
 ## Attendance Processing
 
-- Attendance report generation
-- Late participant detection
-- Absent participant identification
-- Duplicate participant detection
-- Automatic participant grouping
-- Roll number normalization
-- Attendance duration calculation
-- Blacklisted participant filtering 
-- Configurable attendance and late thresholds
+- Generate Attendance, Late, Absent, Filtered, and Unknown participant reports
+- Intelligent duplicate participant detection and merging
+- Automatic participant grouping using roll numbers 
+- Advanced roll number recognition supporting multiple formats
+- Automatic participant name normalization
+- Attendance and absent threshold customization
+- Automatic attendance and late cutoff detection
+- Multiple meeting batch presets
+- Support for processing multiple Zoom CSV files
 
 ## CSV Export
 
-- Auto CSV generation
+- Automatic CSV issue report generation
 - Combined attendance and late issue report
-- Standardized CSV format for downstream systems
 - Generates:
   - `LESS_TIME`
   - `LATE_ARRIVAL`
-
-## User Interface
-
-- Modern UI
-- Drag-and-drop support
-- File browser support
-- Auto issued date detection
-- Auto AM/PM detection
-- Report quality validation
-- Success and warning pop-ups
-- Compact and responsive UI
+- CSV format ready for downstream processing
 
 ## Report Generation
 
 - Formatted Excel reports
-- Color-coded attendance 
-- Auto worksheet formatting
-- Excel filters enabled
-- Auto column sizing
+- Automatic worksheet formatting
+- Color-coded attendance status
 - Alphabetically sorted reports
+- Automatic worksheet filters
+- Automatic column sizing
+- Automatic report naming using meeting metadata
+
+## User Interface
+
+- Modern CustomTkinter interface
+- Drag-and-drop CSV support
+- Multi-file confirmation window
+- Automatic meeting date detection
+- Automatic AM/PM detection
+- Automatic report validation
+- Success, warning, and error notifications
+- Compact and responsive UI
 
 ---
 
 # 📊 Generated Reports
 
-The application generates:
-
 | Sheet | Description |
-|--------|-------------|
-| **RAW** | Original Zoom attendance report |
+|-------|-------------|
+| **RAW** | Original participant attendance data |
 | **ATT** | Attendance summary |
 | **ABSENT** | Participants below the attendance threshold |
 | **LATE** | Participants joining after the configured cutoff time |
 | **CF** | Filtered participants |
+| **UNKNOWN** | Device or unidentified participant names |
 | **CSV Issue Report** | Combined attendance and late issues for external systems |
 
 ---
 
-# 🚀 What's New in v2.0.0
+# 🚀 What's New in v2.1.0
 
-## CSV Export
-
-- Added automatic CSV export
-- Generates issue reports containing:
-  - `LESS_TIME`
-  - `LATE_ARRIVAL`
-- Output formatted for downstream processing
-
-## Smarter Attendance Engine
-
-- Redesigned participant matching algorithm
-- Exact duplicate detection
-- Duplicate merging on participant names
-- Meeting-duration-aware duplicate resolution
-- Improved participant priority selection
-
-## User Experience
-
-- Auto issued date detection from Zoom reports
-- Warning for reports generated on a different date
-- Auto AM/PM detection
-- Additional batch presets
-- Auto opening of generated Excel and CSV reports
-- More compact user interface
-
-## Validation
-
-- Auto report quality check
-- Warns when a large percentage of participants are flagged, helping prevent incorrect attendance settings
+- Added multi-file Zoom report support
+- Added automatic CSV issue report generation
+- Added automatic attendance configuration
+- Added automatic late cutoff detection
+- Added automatic meeting metadata detection
+- Added multi-report confirmation window
+- Added Unknown participant detection
+- Improved duplicate participant matching
+- Improved report accuracy
+- Improved UI and workflow
+- Faster generation
+- Better validation and error handling
 
 ---
 
@@ -111,27 +94,26 @@ The application generates:
 - tkinterdnd2
 - pandas
 - openpyxl
-
----
+- rapidfuzz
 
 # 📦 Usage
 
 1. Launch the application.
-2. Drag and drop a Zoom participant report CSV file or browse manually.
-3. Select the required report options.
-4. Configure attendance and late settings if needed.
+2. Drag and drop one or more Zoom participant CSV files.
+3. Review or adjust the automatically detected settings.
+4. Select the required report options.
 5. Choose an output location.
-6. Click **Generate Report**.
-7. The generated Excel report and CSV issue report (if enabled) will open automatically.
+6. Generate the report.
 
 ---
 
 # 📁 Project Structure
 
-```
+```text
 .
 ├── tool.py              # App entry point
-├── ui.py                # UI
+├── ui.py                # Main UI 
+├── ui2.py               # Multi-report confirmation window
 ├── core.py              # Attendance processing unit
 ├── logo.png
 ├── requirements.txt
@@ -141,6 +123,21 @@ The application generates:
 
 ---
 
+# 📝 Changelog
+
+## v2.1.0
+
+- Added multi-file report generation
+- Added automatic report configuration
+- Added CSV issue report export
+- Added Unknown participant detection
+- Improved duplicate detection
+- Improved participant grouping
+- Improved report validation
+- Improved UI and workflow
+- Performance and reliability improvements
+
+---
 
 # ⚠ Disclaimer
 

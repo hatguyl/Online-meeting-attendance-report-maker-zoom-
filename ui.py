@@ -1,11 +1,24 @@
 import customtkinter as ctk
 from tkinterdnd2 import TkinterDnD, DND_FILES
 from tkinter import filedialog, messagebox
+from ui2 import MultiCSVConfirm
 from PIL import Image, ImageTk
 import os, sys, threading
+<<<<<<< HEAD
+from core import process
+=======
 import subprocess
 import pandas as pd 
-from core import process, extract_att_data, extract_late_data, export_to_csv
+from core import (
+    process,
+    extract_att_data,
+    extract_late_data,
+    export_to_csv,
+    combine_csv_files,
+    group_csv_files,
+    extract_meeting_metadata
+)
+>>>>>>> ea9d9ec (v2.1.0)
 
 
 # +-------------------+
@@ -25,7 +38,6 @@ def resource_path(relative_path):
 ctk.set_appearance_mode("dark")
 ctk.set_default_color_theme("dark-blue")
 
-
 class App(TkinterDnD.Tk):
     def __init__(self):
         super().__init__()
@@ -34,10 +46,9 @@ class App(TkinterDnD.Tk):
         # | WINDOW CONFIG  |
         # +----------------+
         self.title("Report tool")
-        self.geometry("400x540")
+        self.geometry("420x540")
         self.resizable(False, False)
-        self.minsize(400, 540)
-        self.maxsize(400, 540)
+        self.minsize(420, 540)
         self.configure(bg="#111111")
 
         # +----------------+
@@ -51,15 +62,15 @@ class App(TkinterDnD.Tk):
         self.MUTED = "#ffffff"
         self.ACCENT = "#9c30f4"
 
+
         # +----------------+
         # | STATE VARIABLES|
         # +----------------+
-        self.csv_path = ""
+        self.csv_files = []
         self.do_att = ctk.BooleanVar(value=True)
         self.do_late = ctk.BooleanVar(value=True)
-        self.do_csv = ctk.BooleanVar(value=True)
 
-        self.batch = ctk.StringVar(value="MRNG (6 to 7:30)")
+        self.batch = ctk.StringVar(value="NOT SELECTED")
         self.late_time = ctk.StringVar(value="06:05:55")
         self.late_ampm = ctk.StringVar(value="AM")
 
@@ -67,7 +78,7 @@ class App(TkinterDnD.Tk):
         # | MAIN CARD      |
         # +----------------+
         self.card = ctk.CTkFrame(self, corner_radius=22, fg_color=self.CARD)
-        self.card.pack(padx=14, pady=12, fill="both", expand=False)
+        self.card.pack(padx=15, pady=15, fill="both", expand=True)
 
         # +----------------+
         # | LOGO & ICON    |
@@ -83,7 +94,7 @@ class App(TkinterDnD.Tk):
         # +----------------+
         # | CSV DROP FILE  |
         # +----------------+
-        self.drop = ctk.CTkFrame(self.card, height=95, corner_radius=16, fg_color=self.FIELD)
+        self.drop = ctk.CTkFrame(self.card, height=110, corner_radius=16, fg_color=self.FIELD)
         self.drop.pack(padx=20, pady=12, fill="x")
 
         self.drop_label = ctk.CTkLabel(
@@ -114,55 +125,55 @@ class App(TkinterDnD.Tk):
         # | MODE TOGGLES   |
         # +----------------+
         chk_row = ctk.CTkFrame(self.card, fg_color="transparent")
-        chk_row.pack(pady=8)
+        chk_row.pack(pady=10)
 
-        ctk.CTkCheckBox(
-            chk_row,
-            text="CSV",
-            variable=self.do_csv,
-            checkbox_width=20, checkbox_height=20,
-            fg_color=self.ACCENT,
-            hover_color="#ffd95a"
-        ).pack(side="left", padx=10)
-
-        ctk.CTkCheckBox(
-            chk_row,
-            text="ATT",
+        ctk.CTkCheckBox(chk_row, text="Attendance",
             variable=self.do_att,
-            checkbox_width=20, checkbox_height=20,
-            fg_color=self.ACCENT,
-            hover_color="#ffd95a",
+            checkbox_width=22, checkbox_height=22,
+            fg_color=self.ACCENT, hover_color="#ffd95a",
             command=self.update_input_states
-        ).pack(side="left", padx=10)
+        ).pack(side="left", padx=30)
 
         ctk.CTkCheckBox(
-            chk_row,
-            text="LATE",
+            chk_row, text="Late",
             variable=self.do_late,
-            checkbox_width=20, checkbox_height=20,
-            fg_color=self.ACCENT,
-            hover_color="#ffd95a",
+            checkbox_width=22, checkbox_height=22,
+            fg_color=self.ACCENT, hover_color="#ffd95a",
             command=self.update_input_states
-        ).pack(side="left", padx=10)
+        ).pack(side="left", padx=30)
 
         # +----------------+
         # | BATCH SELECT   |
         # +----------------+
         ctk.CTkLabel(
             self.card,
-            text="Batch Timing",
+            text="Batch Timimg",
             text_color=self.MUTED,
             anchor="center"
         ).pack(pady=(10, 5))
 
         self.batch_menu = ctk.CTkOptionMenu(
             self.card,
+<<<<<<< HEAD
             values=["MRNG (6 to 7:30)",
                     "MRNG (6 to 8)", 
-                    "EVNG (7 to 9:30)",
-                    "EVNG (7:30 to 9:30)",
-                    "REVISE & EXAM",
+                    "EVNG(7 to 9:30)",
+                    "EVNG(7:30 to 9:30)",
                     "OTHERS"],
+=======
+        values=[
+            "AUTOMATIC",
+            "NOT SELECTED",
+            "MRNG (6 to 7:30)",
+            "MRNG (6 to 8)",
+            "EVNG (7 to 8:30)",     
+            "EVNG (7 to 9:30)",
+            "EVNG (7:30 to 9:30)",
+            "3 HOURS CLASS",     
+            "REVISE & EXAM",
+            "OTHERS"
+        ],
+>>>>>>> ea9d9ec (v2.1.0)
             variable=self.batch,
             command=self.apply_batch,
             fg_color=self.FIELD,
@@ -170,6 +181,7 @@ class App(TkinterDnD.Tk):
             button_hover_color="#ffd95a"
         )
         self.batch_menu.pack()
+        self.batch_menu.configure(state="disabled")
 
         # +----------------+
         # | ATT / ABS BOX  |
@@ -202,19 +214,7 @@ class App(TkinterDnD.Tk):
         )
         self.abs_entry.pack(side="left")
         self.abs_entry.insert(0, "10")
-       
-       
-        # +----------------+
-        # | ISSUED DATE    |
-        # +----------------+
-        self.issued_date_label = ctk.CTkLabel(
-            self.card,
-            text="Issued Date: —",
-            text_color=self.MUTED,
-            font=("Segoe UI", 12),
-            anchor="center"
-        )
-        self.issued_date_label.pack(pady=(2, 2))
+
 
         # +----------------+
         # | LATE INPUTS    |
@@ -223,7 +223,7 @@ class App(TkinterDnD.Tk):
             self.card,
             text="Late Cutoff Time (HH:MM:SS)",
             text_color=self.MUTED
-        ).pack(pady=(4, 0))
+        ).pack(pady=(10, 0))
 
         time_row = ctk.CTkFrame(self.card, fg_color="transparent")
         time_row.pack(padx=30, pady=4)
@@ -260,9 +260,15 @@ class App(TkinterDnD.Tk):
             hover_color="#ffd95a",
             text_color="#000000",
             command=self.run
-        ).pack(pady=(8, 10), fill="x", padx=30)
+<<<<<<< HEAD
+        ).pack(pady=(10, 12), fill="x", padx=30)
 
         self.apply_batch("MRNG")
+        self.update_input_states()
+
+        # +----------------+
+=======
+        ).pack(pady=(8, 10), fill="x", padx=30)
         self.update_input_states()
 
         # +----------------+
@@ -270,7 +276,7 @@ class App(TkinterDnD.Tk):
         # +----------------+
         self.version_label = ctk.CTkLabel(
             self,
-            text="v2.0.0",
+            text="v2.1",
             font=("Segoe UI", 9),
             text_color=self.MUTED
         )
@@ -284,6 +290,7 @@ class App(TkinterDnD.Tk):
         )
 
         # +----------------+
+>>>>>>> ea9d9ec (v2.1.0)
         # | SAFE SHUTDOWN  |
         # +----------------+
         self.protocol("WM_DELETE_WINDOW", self.safe_close)
@@ -293,19 +300,6 @@ class App(TkinterDnD.Tk):
     # +----------------+
     def safe_close(self):
         self.destroy()
-    
-    def open_file(self, path):
-        try:
-            if sys.platform == "win32":
-                os.startfile(path)
-            elif sys.platform == "darwin":
-                import subprocess
-                subprocess.call(["open", path])
-            else:
-                import subprocess
-                subprocess.call(["xdg-open", path])
-        except Exception as e:
-            print("Open failed:", e)
 
     # +----------------+
     # | UI HELPERS     |
@@ -331,11 +325,12 @@ class App(TkinterDnD.Tk):
         )
         entry.pack(fill="x", padx=30)
         return entry
+<<<<<<< HEAD
+=======
     
     def update_issued_date(self, csv_path):
         try:
-            df = pd.read_csv(csv_path)
-
+            df = combine_csv_files([csv_path])
             join_col = None
             for c in df.columns:
                 if "join" in c.lower():
@@ -383,46 +378,289 @@ class App(TkinterDnD.Tk):
                 self.late_ampm.set("AM")
         except Exception:
             self.issued_date_label.configure(text="Issued Date: —")
+    
+    def auto_fill_from_csv(self, csv_path):
+        try:
+            df = combine_csv_files([csv_path])
 
+            # ---------- FIND COLUMNS ----------
+            join_col = next(
+                (c for c in df.columns if "join" in c.lower()),
+                None
+            )
+
+            leave_col = next(
+                (c for c in df.columns if "leave" in c.lower()),
+                None
+            )
+
+            dur_col = next(
+                (c for c in df.columns if "duration" in c.lower()),
+                None
+            )
+
+            if not join_col or not leave_col:
+                return
+
+            # ---------- PARSE ----------
+            join_times = pd.to_datetime(
+                df[join_col],
+                errors="coerce",
+                format="mixed"
+            ).dropna()
+
+            leave_times = pd.to_datetime(
+                df[leave_col],
+                errors="coerce",
+                format="mixed"
+            ).dropna()
+
+            durations = pd.to_numeric(
+                df[dur_col],
+                errors="coerce"
+            ).dropna()
+
+            if join_times.empty or leave_times.empty:
+                return
+
+            # +------------------------+
+            # |EARLIEST STRONG CLUSTER |
+            # +------------------------+
+
+            join_floor = join_times.dt.floor("min")
+
+            counts = (
+                join_floor.value_counts()
+            )
+
+            participant_count = len(join_times)
+
+            if participant_count <= 15:
+                threshold = 1
+            elif participant_count <= 40:
+                threshold = 2
+            else:
+                threshold = max(3, int(participant_count * 0.03))
+
+            strong_clusters = counts[
+                counts >= threshold
+            ]
+
+            if not strong_clusters.empty:
+
+                dominant = strong_clusters.index.min()
+
+            else:
+
+                dominant = counts.sort_index().index[0]
+
+            # +------------------------+
+            # | ROUND TO VALID SLOT    |
+            # +------------------------+
+
+            hour = dominant.hour
+            minute = dominant.minute
+
+            if minute < 15:
+                snapped_minute = 0
+
+            elif minute < 45:
+                snapped_minute = 30
+
+            else:
+                snapped_minute = 0
+                hour += 1
+
+            class_start = dominant.replace(
+                hour=hour,
+                minute=snapped_minute,
+                second=0
+            )
+
+            # +------------------------+
+            # | SMART DUE DETECTION    |
+            # +------------------------+
+
+            top_users = durations.sort_values(ascending=False)
+
+            top_count = max(5, int(len(top_users) * 0.15))
+
+            strong_duration = top_users.head(top_count).mean()
+
+            duration_slots = [
+                (60,  "1 HOUR CLASS"),
+                (90,  "1.5 HOUR CLASS"),
+                (120, "2 HOUR CLASS"),
+                (150, "2.5 HOUR CLASS"),
+                (180, "3 HOUR CLASS"),
+                (210, "3.5 HOUR CLASS"),
+                (240, "4 HOUR CLASS"),
+                (270, "4.5 HOUR CLASS"),
+            ]
+
+            class_minutes = min(
+                duration_slots,
+                key=lambda x: abs(x[0] - strong_duration)
+            )[0]
+
+            batch_name = dict(duration_slots)[class_minutes]
+
+            # +------------------------+
+            # | LATE CUTOFF            |
+            # +------------------------+
+
+            late_cutoff = class_start + pd.Timedelta(
+                minutes=5,
+                seconds=55
+            )
+
+            # +------------------------+
+            # | ATTENDANCE RULES       |
+            # +------------------------+
+
+            attendance_rules = {
+                60:  (50, 5),
+                90:  (75, 10),
+                120: (100, 15),
+                150: (130, 20),
+                180: (140, 30),
+                210: (170, 30),
+                240: (200, 40),
+                270: (230, 40),
+            }
+
+            attendance, absent = attendance_rules[class_minutes]
+
+            # +------------------------+
+            # | APPLY TO UI            |
+            # +------------------------+
+
+            if len(self.csv_files) <= 1:
+                self.batch.set(batch_name)
+
+            self.late_time.set(
+                late_cutoff.strftime("%I:%M:%S")
+            )
+
+            self.late_ampm.set(
+                late_cutoff.strftime("%p")
+            )
+
+            self.att_entry.delete(0, "end")
+            self.att_entry.insert(0, str(attendance))
+
+            self.abs_entry.delete(0, "end")
+            self.abs_entry.insert(0, str(absent))
+
+        except Exception as e:
+            print("Auto-fill failed:", e)
+>>>>>>> ea9d9ec (v2.1.0)
 
     # +----------------+
     # | FILE HANDLING  |
     # +----------------+
     def browse(self):
+<<<<<<< HEAD
         path = filedialog.askopenfilename(filetypes=[("CSV Files", "*.csv")])
         if path:
             self.csv_path = path
             self.drop_label.configure(text=f"📄\n{os.path.basename(path)}")
-            self.update_issued_date(path)
+=======
+        paths = filedialog.askopenfilenames(
+            filetypes=[("CSV Files", "*.csv")]
+        )
+
+        if paths:
+            self.csv_files = list(paths)
+            if len(self.csv_files) > 1:
+                self.batch.set("AUTOMATIC")
+
+            count = len(self.csv_files)
+
+            if count == 1:
+                label = os.path.basename(self.csv_files[0])
+            else:
+                label = (
+                    "1 CSV file selected"
+                    if count == 1
+                    else f"{count} CSV files selected"
+                )
+
+            self.drop_label.configure(
+                text=f"📄\n{label}"
+            )
+
+            self.update_issued_date(self.csv_files[0])
+            self.auto_fill_from_csv(self.csv_files[0])
+
+            self.batch_menu.configure(state="normal")
+>>>>>>> ea9d9ec (v2.1.0)
 
     def on_drop(self, event):
+
         files = self.tk.splitlist(event.data)
+
+        valid = []
 
         for path in files:
             path = path.strip()
 
+<<<<<<< HEAD
             if path.lower().endswith(".csv") and os.path.exists(path):
                 self.csv_path = path
                 self.drop_label.configure(
                     text=f"📄\n{os.path.basename(path)}"
+         
                 )
-                self.update_issued_date(path)
-                return
+                return  
+=======
+            if (
+                path.lower().endswith(".csv")
+                and os.path.exists(path)
+            ):
+                valid.append(path)
 
+        if not valid:
+            messagebox.showerror(
+                "Invalid file",
+                "Please drop Zoom-generated CSV files only."
+            )
+            return
+>>>>>>> ea9d9ec (v2.1.0)
 
-        messagebox.showerror(
-            "Invalid file",
-            "Please drop a Zoom-generated CSV file only."
+        self.csv_files = valid
+        if len(self.csv_files) > 1:
+            self.batch.set("AUTOMATIC")
+
+        count = len(valid)
+
+        if count == 1:
+            label = os.path.basename(valid[0])
+        else:
+            label = f"{count} CSV files selected"
+
+        self.drop_label.configure(
+            text=f"📄\n{label}"
         )
+
+        self.update_issued_date(valid[0])
+        self.auto_fill_from_csv(valid[0])
+
+        self.batch_menu.configure(state="normal")
 
     # +----------------+
     # | BATCH LOGIC    |
     # +----------------+
     def apply_batch(self, _):
+<<<<<<< HEAD
+=======
+        if self.batch.get() == "NOT SELECTED":
+            return
         self.do_late.set(True)
         self.abs_entry.delete(0, "end")
         self.abs_entry.insert(0, "10")
 
+>>>>>>> ea9d9ec (v2.1.0)
         if self.batch.get() == "MRNG (6 to 7:30)":
             self.att_entry.delete(0, "end")
             self.att_entry.insert(0, "75")
@@ -433,124 +671,333 @@ class App(TkinterDnD.Tk):
             self.att_entry.insert(0, "100")
             self.late_time.set("06:05:55")
             self.late_ampm.set("AM")
-        elif self.batch.get() == "EVNG (7:30 to 9:30)":
+        elif self.batch.get() == "EVNG(7:30 to 9:30)":
             self.att_entry.delete(0, "end")
             self.att_entry.insert(0, "100")
             self.late_time.set("07:35:55")
             self.late_ampm.set("PM")
-        elif self.batch.get() == "EVNG (7 to 9:30)":
+        elif self.batch.get() == "EVNG(7 to 9:30)":
             self.att_entry.delete(0, "end")
             self.att_entry.insert(0, "130")
             self.late_time.set("07:05:55")
             self.late_ampm.set("PM")
+<<<<<<< HEAD
+=======
+        elif self.batch.get() == "EVNG (7 to 8:30)":
+            self.att_entry.delete(0, "end")
+            self.att_entry.insert(0, "70")
+            self.late_time.set("07:05:55")
+            self.late_ampm.set("PM")
+        elif self.batch.get() == "3 HOURS CLASS":
+            self.att_entry.delete(0, "end")
+            self.att_entry.insert(0, "140")
+            self.abs_entry.delete(0, "end")
+            self.late_time.set("12:00:00")
+            self.late_ampm.set("AM")
+            self.abs_entry.insert(0, "30")
         elif self.batch.get() == "REVISE & EXAM":
             self.att_entry.delete(0, "end")
             self.att_entry.insert(0, "0")
             self.abs_entry.delete(0, "end")
             self.abs_entry.insert(0, "0")
             self.do_late.set(False)
+>>>>>>> ea9d9ec (v2.1.0)
 
         self.update_input_states()
 
     # +----------------+
     # | MAIN EXEC      |
     # +----------------+
+
+    # SHARED LATE CUTOFF LOGIC  
+    def _compute_late_cutoff(self, csv_group):
+        """Return (late_time_str, late_ampm_str) using the same cluster logic as auto_fill."""
+        try:
+            df = combine_csv_files(csv_group)
+            join_col = next((c for c in df.columns if "join" in c.lower()), None)
+            if not join_col:
+                return self.late_time.get(), self.late_ampm.get()
+            join_times = pd.to_datetime(df[join_col], errors="coerce", format="mixed").dropna()
+            if join_times.empty:
+                return self.late_time.get(), self.late_ampm.get()
+            counts = join_times.dt.floor("min").value_counts()
+            n = len(join_times)
+            threshold = 1 if n <= 15 else 2 if n <= 40 else max(3, int(n * 0.03))
+            strong = counts[counts >= threshold]
+            dominant = strong.index.min() if not strong.empty else counts.sort_index().index[0]
+            h, m = dominant.hour, dominant.minute
+            if m < 15:   snapped = 0
+            elif m < 45: snapped = 30
+            else:        snapped = 0; h += 1
+            cutoff = dominant.replace(hour=h, minute=snapped, second=0) + pd.Timedelta(minutes=5, seconds=55)
+            return cutoff.strftime("%I:%M:%S"), cutoff.strftime("%p")
+        except Exception:
+            return self.late_time.get(), self.late_ampm.get()
+
+    def open_multi_confirm(self, groups, _save_jobs):
+
+        reports = []
+        for group in groups:
+            try:
+                meta  = extract_meeting_metadata(group[0])
+                topic = (
+                    str(meta.get("topic", "REPORT"))
+                    .replace("MENTORBEE", "").replace("EDUVERSE", "").strip()
+                )
+
+                # ---------- AUTO DETECT ATTENDANCE ----------
+                temp_df  = combine_csv_files(group)
+                dur_col  = next((c for c in temp_df.columns if "duration" in c.lower()), None)
+                attendance, absent = 75, 10
+                if dur_col:
+                    durations = pd.to_numeric(temp_df[dur_col], errors="coerce").dropna()
+                    if not durations.empty:
+                        top_count      = max(5, int(len(durations) * 0.15))
+                        strong_dur     = durations.sort_values(ascending=False).head(top_count).mean()
+                        for thresh, att, ab in [
+                            (75, 50, 5), (105, 75, 10), (135, 100, 15), (165, 130, 20)
+                        ]:
+                            if strong_dur <= thresh:
+                                attendance, absent = att, ab
+                                break
+                        else:
+                            attendance, absent = 140, 30
+
+                # ---------- ACCURATE LATE CUTOFF ----------
+                late_time, late_ampm = self._compute_late_cutoff(group)
+
+                reports.append({
+                    "group": group, "topic": topic,
+                    "attendance": attendance, "absent": absent,
+                    "late_time": late_time, "late_ampm": late_ampm,
+                })
+            except Exception as e:
+                print("Config build failed:", e)
+        
+        # AUTO NAMING 
+        def generate_callback(configs):
+            save_jobs = []
+            for cfg in configs:
+                group = cfg["group"]
+                try:
+                    meta  = extract_meeting_metadata(group[0])
+                    topic = (
+                        str(meta.get("topic", "REPORT"))
+                        .replace("COMPANY NAME", "").replace("UNESSARY NAME", "")
+                        .replace("Mentorbee", "").replace("Eduverse", "")
+                        .replace("/", "-").replace("\\", "-").replace(":", "-")
+                        .replace("*", "").replace("?", "").replace('"', "")
+                        .replace("<", "").replace(">", "").replace("|", "")
+                        .strip()
+                    )
+                    held_date = "UNKNOWN_DATE"
+                    try:
+                        held_date = pd.to_datetime(meta.get("start", ""), format="mixed").strftime("%d-%m-%Y")
+                    except Exception:
+                        pass
+                    mode = (
+                        "ATT & LATE" if self.do_att.get() and self.do_late.get() else
+                        "ATT"        if self.do_att.get() else
+                        "LATE"       if self.do_late.get() else "REPORT"
+                    )
+                    topic = f"[{held_date}] {topic} {mode}"
+                except Exception:
+                    topic = "REPORT"
+
+                out = filedialog.asksaveasfilename(
+                    defaultextension=".xlsx",
+                    initialfile=f"{topic}.xlsx",
+                    title=f"Save report for {topic}"
+                )
+                if not out:
+                    return False   
+                save_jobs.append((cfg, out))
+
+            self.pending_save_jobs = save_jobs
+            threading.Thread(
+                target=lambda: self._run_multi_reports(configs, save_jobs),
+                daemon=True
+            ).start()
+            return True  
+
+        MultiCSVConfirm(self, reports, generate_callback,
+                        do_att=self.do_att.get(),
+                        do_late=self.do_late.get(),
+                        do_csv=self.do_csv.get())
+
+    def _run_multi_reports(self, configs, save_jobs):
+        success, failed, last_out = 0, 0, None
+        for cfg, out in save_jobs:
+            try:
+                do_att  = cfg.get("do_att",  self.do_att.get())  or cfg.get("do_csv", self.do_csv.get())
+                do_late = cfg.get("do_late", self.do_late.get()) or cfg.get("do_csv", self.do_csv.get())
+                process(
+                    cfg["group"],
+                    do_att,
+                    do_late,
+                    cfg["late_time"], cfg["late_ampm"],
+                    cfg["attendance"], cfg["absent"],
+                    out
+                )
+
+                # ---------- CSV EXPORT ----------
+                if cfg.get("do_csv", self.do_csv.get()):
+                    try:
+                        final_data = [
+                            r for r in (extract_att_data(out) or []) + (extract_late_data(out) or [])
+                            if r.get("Roll Number") or r.get("Name")
+                        ]
+                        if final_data:
+                            base = (
+                                os.path.splitext(os.path.basename(out))[0]
+                                .replace("ATT & LATE", "").replace("ATT", "")
+                                .replace("LATE", "").replace("REPORT", "").strip()
+                            )
+                            export_to_csv(final_data, os.path.dirname(out), f"{base} CSV")
+                    except Exception as e:
+                        print("CSV export failed:", e)
+
+                last_out = out
+                success += 1
+            except Exception as e:
+                print("Process failed:", e)
+                failed += 1
+
+        self.after(0, lambda: messagebox.showinfo(
+            "Completed", f"{success} report(s) generated\n{failed} failed"
+        ))
+        try:
+            if last_out:
+                self.open_file(last_out if len(configs) == 1 else os.path.dirname(last_out))
+        except Exception:
+            pass
+        
     def run(self):
-        if not self.csv_path:
+        if not self.csv_files:
             messagebox.showerror("Error", "Select Zoom generated CSV")
             return
 
         try:
-            total_att = int(self.att_entry.get())
+            total_att    = int(self.att_entry.get())
             absent_limit = int(self.abs_entry.get())
         except ValueError:
             messagebox.showerror("Invalid Input", "Attendance and Absent values must be integers")
             return
 
-        out = filedialog.asksaveasfilename(defaultextension=".xlsx")
+        groups = group_csv_files(self.csv_files)
+
+        # ---- confirmation window ----
+        if len(groups) > 1:
+            self.open_multi_confirm(groups, [])
+            return
+
+        # ---- single group ----
+        group = groups[0]
+        try:
+            meta  = extract_meeting_metadata(group[0])
+            topic = (
+                str(meta.get("topic", "REPORT"))
+                .replace("COMPANY", "").replace("NAME", "")
+                .replace("/", "-").replace("\\", "-").replace(":", "-").strip()
+            )
+            held_date = "UNKNOWN_DATE"
+            try:
+                held_date = pd.to_datetime(meta.get("start", ""), format="mixed").strftime("%d-%m-%Y")
+            except Exception:
+                pass
+            mode = (
+                "ATT & LATE" if self.do_att.get() and self.do_late.get() else
+                "ATT"        if self.do_att.get() else
+                "LATE"       if self.do_late.get() else "REPORT"
+            )
+            filename = f"[{held_date}] {topic} {mode}"
+        except Exception:
+            filename = "REPORT"
+
+        out = filedialog.asksaveasfilename(
+            defaultextension=".xlsx",
+            initialfile=f"{filename}.xlsx",
+            title="Save Report"
+        )
         if not out:
             return
-        
-        do_att = self.do_att.get() or self.do_csv.get()
-        do_late = self.do_late.get() or self.do_csv.get()
+<<<<<<< HEAD
 
         def task():
             try:
                 process(
                     self.csv_path,
-                    do_att,
-                    do_late,
+                    self.do_att.get(),
+                    self.do_late.get(),
                     self.late_time.get(),
                     self.late_ampm.get(),
                     total_att,
                     absent_limit,
                     out
                 )
-                # ---------- CSV EXPORT ----------
-                if self.do_csv.get():
-                    try:
-                        att_data = extract_att_data(out) or []
-                        late_data = extract_late_data(out) or []
-
-                        final_data = att_data + late_data
-
-                        final_data = [
-                            row for row in final_data
-                            if row.get("Roll Number") or row.get("Name")
-                        ]
-
-                        if final_data:
-                            folder = os.path.dirname(out)
-                            filename = os.path.splitext(os.path.basename(out))[0] + "_C"
-
-                            export_to_csv(final_data, folder, filename)
-
-                    except Exception as e:
-                        print("CSV export failed:", e)
-                def done():
-                    self.open_file(out)
-
-                    csv_path = os.path.join(
-                        os.path.dirname(out),
-                        os.path.splitext(os.path.basename(out))[0] + "_C.csv"
-                    )
-
-                    if os.path.exists(csv_path):
-                        self.open_file(csv_path)
-
-                    messagebox.showinfo("Success", "Report generated successfully")
-
-                self.after(0, done)
-                # ---------- ISSUE RATIO CHECK ----------
-                try:
-                    total_people = len(pd.read_excel(out, sheet_name="ATT"))
-
-                    issue_count = 0
-                    if self.do_att.get():
-                        issue_count += len(extract_att_data(out) or [])
-                    if self.do_late.get():
-                        issue_count += len(extract_late_data(out) or [])
-
-                    if total_people > 0:
-                        ratio = issue_count / total_people
-
-                        if ratio > 0.55:
-                            self.after(
-                                0,
-                                lambda: messagebox.showwarning(
-                                    "Warning",
-                                    "Something wrong on the values you have entered please do check."
-                                )
-                            )
-                except Exception as e:
-                    print("Ratio check failed:", e)
-            except Exception as e:
-                err = str(e)
                 self.after(
                     0,
-                    lambda err=err: messagebox.showerror("Error", err)
+                    lambda: messagebox.showinfo(
+                        "Success", "Report generated successfully"
+                    )
                 )
+=======
 
+        if self.batch.get() == "AUTOMATIC":
+            late_time, late_ampm = self._compute_late_cutoff(group)
+        else:
+            late_time = self.late_time.get()
+            late_ampm = self.late_ampm.get()
+
+        do_att  = self.do_att.get()  or self.do_csv.get()
+        do_late = self.do_late.get() or self.do_csv.get()
+
+        def task():
+            try:
+                process(group, do_att, do_late, late_time, late_ampm,
+                        total_att, absent_limit, out)
+
+                # ---------- CSV EXPORT ----------
+                csv_out = None
+                if self.do_csv.get():
+                    try:
+                        final_data = [
+                            r for r in (extract_att_data(out) or []) + (extract_late_data(out) or [])
+                            if r.get("Roll Number") or r.get("Name")
+                        ]
+                        if final_data:
+                            base = (
+                                os.path.splitext(os.path.basename(out))[0]
+                                .replace("ATT & LATE", "").replace("ATT", "")
+                                .replace("LATE", "").replace("REPORT", "").strip()
+                            )
+                            csv_out = export_to_csv(final_data, os.path.dirname(out), f"{base} CSV")
+                    except Exception as e:
+                        print("CSV export failed:", e)
+
+                # ---------- RATIO CHECK ----------
+                try:
+                    total_people = len(pd.read_excel(out, sheet_name="ATT"))
+                    issue_count  = (
+                        len(extract_att_data(out) or []) * self.do_att.get() +
+                        len(extract_late_data(out) or []) * self.do_late.get()
+                    )
+                    if total_people > 0 and issue_count / total_people > 0.55:
+                        self.after(0, lambda: messagebox.showwarning(
+                            "Warning",
+                            "Something wrong on the values you have entered please do check."
+                        ))
+                except Exception as e:
+                    print("Ratio check failed:", e)
+
+                self.after(0, lambda: messagebox.showinfo("Completed", "Report generated"))
+                self.after(0, lambda: self.open_file(out))
+                if csv_out:
+                    self.after(0, lambda p=csv_out: self.open_file(p))
+
+>>>>>>> ea9d9ec (v2.1.0)
+            except Exception as e:
+                err = str(e)
+                self.after(0, lambda err=err: messagebox.showerror("Error", err))
 
         threading.Thread(target=task, daemon=True).start()
-

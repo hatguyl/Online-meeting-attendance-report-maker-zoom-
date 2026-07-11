@@ -5,7 +5,6 @@ from openpyxl.styles import PatternFill, Font
 from rapidfuzz import fuzz
 import re
 
-
 # +----------------+
 # | EXCEL STYLES   |
 # +----------------+
@@ -20,7 +19,6 @@ ROW2 = PatternFill("solid", fgColor="d1d1d1")
 GREEN = PatternFill("solid", fgColor="90EE90")
 RED = PatternFill("solid", fgColor="FF7F7F")
 YELLOW = PatternFill("solid", fgColor="FFD966")
-
 
 # +----------------+
 # | REGEX / CONST  |

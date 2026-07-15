@@ -1,12 +1,10 @@
 import customtkinter as ctk
 from tkinterdnd2 import TkinterDnD, DND_FILES
+import datetime
 from tkinter import filedialog, messagebox
 from ui2 import MultiCSVConfirm
 from PIL import Image, ImageTk
 import os, sys, threading
-<<<<<<< HEAD
-from core import process
-=======
 import subprocess
 import pandas as pd 
 from core import (
@@ -18,7 +16,6 @@ from core import (
     group_csv_files,
     extract_meeting_metadata
 )
->>>>>>> ea9d9ec (v2.1.0)
 
 
 # +-------------------+
@@ -46,9 +43,10 @@ class App(TkinterDnD.Tk):
         # | WINDOW CONFIG  |
         # +----------------+
         self.title("Report tool")
-        self.geometry("420x540")
+        self.geometry("400x540")
         self.resizable(False, False)
-        self.minsize(420, 540)
+        self.minsize(400, 540)
+        self.maxsize(400, 540)
         self.configure(bg="#111111")
 
         # +----------------+
@@ -59,9 +57,8 @@ class App(TkinterDnD.Tk):
         self.FIELD = "#2a2a2a"
         self.FIELD_HOVER = "#343434"
         self.TEXT = "#ffffff"
-        self.MUTED = "#ffffff"
-        self.ACCENT = "#9c30f4"
-
+        self.MUTED = "#bdbdbd"
+        self.ACCENT = "#f4c430"
 
         # +----------------+
         # | STATE VARIABLES|
@@ -69,6 +66,7 @@ class App(TkinterDnD.Tk):
         self.csv_files = []
         self.do_att = ctk.BooleanVar(value=True)
         self.do_late = ctk.BooleanVar(value=True)
+        self.do_csv = ctk.BooleanVar(value=True)
 
         self.batch = ctk.StringVar(value="NOT SELECTED")
         self.late_time = ctk.StringVar(value="06:05:55")
@@ -78,15 +76,15 @@ class App(TkinterDnD.Tk):
         # | MAIN CARD      |
         # +----------------+
         self.card = ctk.CTkFrame(self, corner_radius=22, fg_color=self.CARD)
-        self.card.pack(padx=15, pady=15, fill="both", expand=True)
+        self.card.pack(padx=14, pady=12, fill="both", expand=False)
 
         # +----------------+
         # | LOGO & ICON    |
         # +----------------+
-        logo_img = Image.open(resource_path("logo.png")).resize((160, 55), Image.LANCZOS)
+        logo_img = Image.open(resource_path("mentorbeelogo.png")).resize((160, 55), Image.LANCZOS)
         self.logo = ctk.CTkImage(light_image=logo_img, dark_image=logo_img, size=(160, 55))
 
-        icon_img = Image.open(resource_path("logo.png")).resize((64, 64), Image.LANCZOS)
+        icon_img = Image.open(resource_path("mbeelogo.png")).resize((64, 64), Image.LANCZOS)
         self.iconphoto(False, ImageTk.PhotoImage(icon_img))
 
         ctk.CTkLabel(self.card, image=self.logo, text="").pack(pady=(10, 5))
@@ -94,7 +92,7 @@ class App(TkinterDnD.Tk):
         # +----------------+
         # | CSV DROP FILE  |
         # +----------------+
-        self.drop = ctk.CTkFrame(self.card, height=110, corner_radius=16, fg_color=self.FIELD)
+        self.drop = ctk.CTkFrame(self.card, height=95, corner_radius=16, fg_color=self.FIELD)
         self.drop.pack(padx=20, pady=12, fill="x")
 
         self.drop_label = ctk.CTkLabel(
@@ -125,42 +123,49 @@ class App(TkinterDnD.Tk):
         # | MODE TOGGLES   |
         # +----------------+
         chk_row = ctk.CTkFrame(self.card, fg_color="transparent")
-        chk_row.pack(pady=10)
-
-        ctk.CTkCheckBox(chk_row, text="Attendance",
-            variable=self.do_att,
-            checkbox_width=22, checkbox_height=22,
-            fg_color=self.ACCENT, hover_color="#ffd95a",
-            command=self.update_input_states
-        ).pack(side="left", padx=30)
+        chk_row.pack(pady=8)
 
         ctk.CTkCheckBox(
-            chk_row, text="Late",
-            variable=self.do_late,
-            checkbox_width=22, checkbox_height=22,
-            fg_color=self.ACCENT, hover_color="#ffd95a",
+            chk_row,
+            text="CSV",
+            variable=self.do_csv,
+            checkbox_width=20, checkbox_height=20,
+            fg_color=self.ACCENT,
+            hover_color="#ffd95a"
+        ).pack(side="left", padx=10)
+
+        ctk.CTkCheckBox(
+            chk_row,
+            text="ATT",
+            variable=self.do_att,
+            checkbox_width=20, checkbox_height=20,
+            fg_color=self.ACCENT,
+            hover_color="#ffd95a",
             command=self.update_input_states
-        ).pack(side="left", padx=30)
+        ).pack(side="left", padx=10)
+
+        ctk.CTkCheckBox(
+            chk_row,
+            text="LATE",
+            variable=self.do_late,
+            checkbox_width=20, checkbox_height=20,
+            fg_color=self.ACCENT,
+            hover_color="#ffd95a",
+            command=self.update_input_states
+        ).pack(side="left", padx=10)
 
         # +----------------+
         # | BATCH SELECT   |
         # +----------------+
         ctk.CTkLabel(
             self.card,
-            text="Batch Timimg",
+            text="Batch Timing",
             text_color=self.MUTED,
             anchor="center"
         ).pack(pady=(10, 5))
 
         self.batch_menu = ctk.CTkOptionMenu(
             self.card,
-<<<<<<< HEAD
-            values=["MRNG (6 to 7:30)",
-                    "MRNG (6 to 8)", 
-                    "EVNG(7 to 9:30)",
-                    "EVNG(7:30 to 9:30)",
-                    "OTHERS"],
-=======
         values=[
             "AUTOMATIC",
             "NOT SELECTED",
@@ -173,7 +178,6 @@ class App(TkinterDnD.Tk):
             "REVISE & EXAM",
             "OTHERS"
         ],
->>>>>>> ea9d9ec (v2.1.0)
             variable=self.batch,
             command=self.apply_batch,
             fg_color=self.FIELD,
@@ -214,7 +218,19 @@ class App(TkinterDnD.Tk):
         )
         self.abs_entry.pack(side="left")
         self.abs_entry.insert(0, "10")
-
+       
+       
+        # +----------------+
+        # | ISSUED DATE    |
+        # +----------------+
+        self.issued_date_label = ctk.CTkLabel(
+            self.card,
+            text="Issued Date: —",
+            text_color=self.MUTED,
+            font=("Segoe UI", 12),
+            anchor="center"
+        )
+        self.issued_date_label.pack(pady=(2, 2))
 
         # +----------------+
         # | LATE INPUTS    |
@@ -223,7 +239,7 @@ class App(TkinterDnD.Tk):
             self.card,
             text="Late Cutoff Time (HH:MM:SS)",
             text_color=self.MUTED
-        ).pack(pady=(10, 0))
+        ).pack(pady=(4, 0))
 
         time_row = ctk.CTkFrame(self.card, fg_color="transparent")
         time_row.pack(padx=30, pady=4)
@@ -260,14 +276,6 @@ class App(TkinterDnD.Tk):
             hover_color="#ffd95a",
             text_color="#000000",
             command=self.run
-<<<<<<< HEAD
-        ).pack(pady=(10, 12), fill="x", padx=30)
-
-        self.apply_batch("MRNG")
-        self.update_input_states()
-
-        # +----------------+
-=======
         ).pack(pady=(8, 10), fill="x", padx=30)
         self.update_input_states()
 
@@ -276,7 +284,7 @@ class App(TkinterDnD.Tk):
         # +----------------+
         self.version_label = ctk.CTkLabel(
             self,
-            text="v2.1",
+            text="v3.2.1",
             font=("Segoe UI", 9),
             text_color=self.MUTED
         )
@@ -290,7 +298,6 @@ class App(TkinterDnD.Tk):
         )
 
         # +----------------+
->>>>>>> ea9d9ec (v2.1.0)
         # | SAFE SHUTDOWN  |
         # +----------------+
         self.protocol("WM_DELETE_WINDOW", self.safe_close)
@@ -300,6 +307,19 @@ class App(TkinterDnD.Tk):
     # +----------------+
     def safe_close(self):
         self.destroy()
+    
+    def open_file(self, path):
+        try:
+            if sys.platform == "win32":
+                os.startfile(path)
+            elif sys.platform == "darwin":
+                import subprocess
+                subprocess.call(["open", path])
+            else:
+                import subprocess
+                subprocess.call(["xdg-open", path])
+        except Exception as e:
+            print("Open failed:", e)
 
     # +----------------+
     # | UI HELPERS     |
@@ -325,8 +345,6 @@ class App(TkinterDnD.Tk):
         )
         entry.pack(fill="x", padx=30)
         return entry
-<<<<<<< HEAD
-=======
     
     def update_issued_date(self, csv_path):
         try:
@@ -423,9 +441,9 @@ class App(TkinterDnD.Tk):
             if join_times.empty or leave_times.empty:
                 return
 
-            # +------------------------+
-            # |EARLIEST STRONG CLUSTER |
-            # +------------------------+
+            # ==========================================
+            # EARLIEST STRONG CLUSTER
+            # ==========================================
 
             join_floor = join_times.dt.floor("min")
 
@@ -454,9 +472,9 @@ class App(TkinterDnD.Tk):
 
                 dominant = counts.sort_index().index[0]
 
-            # +------------------------+
-            # | ROUND TO VALID SLOT    |
-            # +------------------------+
+            # ==========================================
+            # ROUND TO VALID SLOT
+            # ==========================================
 
             hour = dominant.hour
             minute = dominant.minute
@@ -477,9 +495,9 @@ class App(TkinterDnD.Tk):
                 second=0
             )
 
-            # +------------------------+
-            # | SMART DUE DETECTION    |
-            # +------------------------+
+            # ==================================================
+            # SMART DUE DETECTION
+            # ==================================================
 
             top_users = durations.sort_values(ascending=False)
 
@@ -505,18 +523,18 @@ class App(TkinterDnD.Tk):
 
             batch_name = dict(duration_slots)[class_minutes]
 
-            # +------------------------+
-            # | LATE CUTOFF            |
-            # +------------------------+
+            # ==================================================
+            # LATE CUTOFF
+            # ==================================================
 
             late_cutoff = class_start + pd.Timedelta(
                 minutes=5,
                 seconds=55
             )
 
-            # +------------------------+
-            # | ATTENDANCE RULES       |
-            # +------------------------+
+            # ==================================================
+            # ATTENDANCE RULES
+            # ==================================================
 
             attendance_rules = {
                 60:  (50, 5),
@@ -531,9 +549,9 @@ class App(TkinterDnD.Tk):
 
             attendance, absent = attendance_rules[class_minutes]
 
-            # +------------------------+
-            # | APPLY TO UI            |
-            # +------------------------+
+            # ==================================================
+            # APPLY TO UI
+            # ==================================================
 
             if len(self.csv_files) <= 1:
                 self.batch.set(batch_name)
@@ -554,18 +572,11 @@ class App(TkinterDnD.Tk):
 
         except Exception as e:
             print("Auto-fill failed:", e)
->>>>>>> ea9d9ec (v2.1.0)
 
     # +----------------+
     # | FILE HANDLING  |
     # +----------------+
     def browse(self):
-<<<<<<< HEAD
-        path = filedialog.askopenfilename(filetypes=[("CSV Files", "*.csv")])
-        if path:
-            self.csv_path = path
-            self.drop_label.configure(text=f"📄\n{os.path.basename(path)}")
-=======
         paths = filedialog.askopenfilenames(
             filetypes=[("CSV Files", "*.csv")]
         )
@@ -594,7 +605,6 @@ class App(TkinterDnD.Tk):
             self.auto_fill_from_csv(self.csv_files[0])
 
             self.batch_menu.configure(state="normal")
->>>>>>> ea9d9ec (v2.1.0)
 
     def on_drop(self, event):
 
@@ -605,15 +615,6 @@ class App(TkinterDnD.Tk):
         for path in files:
             path = path.strip()
 
-<<<<<<< HEAD
-            if path.lower().endswith(".csv") and os.path.exists(path):
-                self.csv_path = path
-                self.drop_label.configure(
-                    text=f"📄\n{os.path.basename(path)}"
-         
-                )
-                return  
-=======
             if (
                 path.lower().endswith(".csv")
                 and os.path.exists(path)
@@ -626,7 +627,6 @@ class App(TkinterDnD.Tk):
                 "Please drop Zoom-generated CSV files only."
             )
             return
->>>>>>> ea9d9ec (v2.1.0)
 
         self.csv_files = valid
         if len(self.csv_files) > 1:
@@ -652,15 +652,12 @@ class App(TkinterDnD.Tk):
     # | BATCH LOGIC    |
     # +----------------+
     def apply_batch(self, _):
-<<<<<<< HEAD
-=======
         if self.batch.get() == "NOT SELECTED":
             return
         self.do_late.set(True)
         self.abs_entry.delete(0, "end")
         self.abs_entry.insert(0, "10")
 
->>>>>>> ea9d9ec (v2.1.0)
         if self.batch.get() == "MRNG (6 to 7:30)":
             self.att_entry.delete(0, "end")
             self.att_entry.insert(0, "75")
@@ -671,18 +668,16 @@ class App(TkinterDnD.Tk):
             self.att_entry.insert(0, "100")
             self.late_time.set("06:05:55")
             self.late_ampm.set("AM")
-        elif self.batch.get() == "EVNG(7:30 to 9:30)":
+        elif self.batch.get() == "EVNG (7:30 to 9:30)":
             self.att_entry.delete(0, "end")
             self.att_entry.insert(0, "100")
             self.late_time.set("07:35:55")
             self.late_ampm.set("PM")
-        elif self.batch.get() == "EVNG(7 to 9:30)":
+        elif self.batch.get() == "EVNG (7 to 9:30)":
             self.att_entry.delete(0, "end")
             self.att_entry.insert(0, "130")
             self.late_time.set("07:05:55")
             self.late_ampm.set("PM")
-<<<<<<< HEAD
-=======
         elif self.batch.get() == "EVNG (7 to 8:30)":
             self.att_entry.delete(0, "end")
             self.att_entry.insert(0, "70")
@@ -701,15 +696,16 @@ class App(TkinterDnD.Tk):
             self.abs_entry.delete(0, "end")
             self.abs_entry.insert(0, "0")
             self.do_late.set(False)
->>>>>>> ea9d9ec (v2.1.0)
 
         self.update_input_states()
 
     # +----------------+
     # | MAIN EXEC      |
     # +----------------+
-
-    # SHARED LATE CUTOFF LOGIC  
+    
+    # +---------------------------+
+    # | SHARED LATE CUTOFF LOGIC  |
+    # +---------------------------+
     def _compute_late_cutoff(self, csv_group):
         """Return (late_time_str, late_ampm_str) using the same cluster logic as auto_fill."""
         try:
@@ -773,8 +769,10 @@ class App(TkinterDnD.Tk):
                 })
             except Exception as e:
                 print("Config build failed:", e)
-        
-        # AUTO NAMING 
+
+        # ==========================================
+        # CALLBACK — returns True only when all saves confirmed (bug 7 fix)
+        # ==========================================
         def generate_callback(configs):
             save_jobs = []
             for cfg in configs:
@@ -783,7 +781,7 @@ class App(TkinterDnD.Tk):
                     meta  = extract_meeting_metadata(group[0])
                     topic = (
                         str(meta.get("topic", "REPORT"))
-                        .replace("COMPANY NAME", "").replace("UNESSARY NAME", "")
+                        .replace("MENTORBEE", "").replace("EDUVERSE", "")
                         .replace("Mentorbee", "").replace("Eduverse", "")
                         .replace("/", "-").replace("\\", "-").replace(":", "-")
                         .replace("*", "").replace("?", "").replace('"', "")
@@ -810,7 +808,7 @@ class App(TkinterDnD.Tk):
                     title=f"Save report for {topic}"
                 )
                 if not out:
-                    return False   
+                    return False   # user cancelled — keep ui2 open
                 save_jobs.append((cfg, out))
 
             self.pending_save_jobs = save_jobs
@@ -818,7 +816,7 @@ class App(TkinterDnD.Tk):
                 target=lambda: self._run_multi_reports(configs, save_jobs),
                 daemon=True
             ).start()
-            return True  
+            return True   # all saves confirmed → ui2 can close
 
         MultiCSVConfirm(self, reports, generate_callback,
                         do_att=self.do_att.get(),
@@ -832,12 +830,17 @@ class App(TkinterDnD.Tk):
                 do_att  = cfg.get("do_att",  self.do_att.get())  or cfg.get("do_csv", self.do_csv.get())
                 do_late = cfg.get("do_late", self.do_late.get()) or cfg.get("do_csv", self.do_csv.get())
                 process(
-                    cfg["group"],
+                    group,
                     do_att,
                     do_late,
-                    cfg["late_time"], cfg["late_ampm"],
-                    cfg["attendance"], cfg["absent"],
-                    out
+                    late_time,
+                    late_ampm,
+                    total_att,
+                    absent_limit,
+                    out,
+                    selected_data=selected_data,
+                    batch_name=self.batch.get(),
+                    issued_date=datetime.datetime.now().strftime("%d/%m/%Y")
                 )
 
                 # ---------- CSV EXPORT ----------
@@ -886,7 +889,7 @@ class App(TkinterDnD.Tk):
 
         groups = group_csv_files(self.csv_files)
 
-        # ---- confirmation window ----
+        # ---- multi-group → open confirmation window ----
         if len(groups) > 1:
             self.open_multi_confirm(groups, [])
             return
@@ -897,7 +900,7 @@ class App(TkinterDnD.Tk):
             meta  = extract_meeting_metadata(group[0])
             topic = (
                 str(meta.get("topic", "REPORT"))
-                .replace("COMPANY", "").replace("NAME", "")
+                .replace("MENTORBEE", "").replace("EDUVERSE", "")
                 .replace("/", "-").replace("\\", "-").replace(":", "-").strip()
             )
             held_date = "UNKNOWN_DATE"
@@ -921,28 +924,8 @@ class App(TkinterDnD.Tk):
         )
         if not out:
             return
-<<<<<<< HEAD
 
-        def task():
-            try:
-                process(
-                    self.csv_path,
-                    self.do_att.get(),
-                    self.do_late.get(),
-                    self.late_time.get(),
-                    self.late_ampm.get(),
-                    total_att,
-                    absent_limit,
-                    out
-                )
-                self.after(
-                    0,
-                    lambda: messagebox.showinfo(
-                        "Success", "Report generated successfully"
-                    )
-                )
-=======
-
+        # Compute late cutoff — use cluster logic for AUTOMATIC, else UI value
         if self.batch.get() == "AUTOMATIC":
             late_time, late_ampm = self._compute_late_cutoff(group)
         else:
@@ -952,10 +935,33 @@ class App(TkinterDnD.Tk):
         do_att  = self.do_att.get()  or self.do_csv.get()
         do_late = self.do_late.get() or self.do_csv.get()
 
+        selected = []
+        if self.do_csv.get():
+            selected.append("CSV")
+
+        if self.do_att.get():
+            selected.append("ATT")
+
+        if self.do_late.get():
+            selected.append("LATE")
+
+        selected_data = ", ".join(selected)
+
         def task():
             try:
-                process(group, do_att, do_late, late_time, late_ampm,
-                        total_att, absent_limit, out)
+                process(
+                    group,
+                    do_att,
+                    do_late,
+                    late_time,
+                    late_ampm,
+                    total_att,
+                    absent_limit,
+                    out,
+                    selected_data=selected_data,
+                    batch_name=self.batch.get(),
+                    issued_date=datetime.datetime.now().strftime("%d/%m/%Y")
+                )
 
                 # ---------- CSV EXPORT ----------
                 csv_out = None
@@ -995,7 +1001,6 @@ class App(TkinterDnD.Tk):
                 if csv_out:
                     self.after(0, lambda p=csv_out: self.open_file(p))
 
->>>>>>> ea9d9ec (v2.1.0)
             except Exception as e:
                 err = str(e)
                 self.after(0, lambda err=err: messagebox.showerror("Error", err))

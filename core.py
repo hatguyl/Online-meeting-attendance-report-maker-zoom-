@@ -66,7 +66,6 @@ def extract_att_data(file_path):
                 "Name": name,
                 "Issue Type": "LESS_TIME"
             })
-
     return data
 
 
